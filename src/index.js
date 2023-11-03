@@ -1,5 +1,10 @@
 const { OpenAI } = require('openai');
-const OPENAI_API_KEY = require('./pass.js');
+const { Telegraf } = require('telegraf');
+
+const { OPENAI_API_KEY } = require('./pass.js');
+const { BOT_TOKEN } = require('./pass.js');
+
+const bot = new Telegraf(BOT_TOKEN);
 const fs = require('fs');
 
 const openai = new OpenAI({
