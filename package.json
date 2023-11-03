@@ -1,0 +1,32 @@
+{
+  "name": "openai_bot",
+  "version": "1.0.0",
+  "description": "openai bot",
+  "main": "index.js",
+  "scripts": {
+    "test": "test",
+    "start": "nodemon bot.js",
+    "develop": "webpack --mode=development",
+    "build": "webpack --mode=production"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Radymyr/openai_bot.git"
+  },
+  "author": "Radymyr",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Radymyr/openai_bot/issues"
+  },
+  "homepage": "https://github.com/Radymyr/openai_bot#readme",
+  "dependencies": {
+    "dotenv": "^16.3.1",
+    "nodemon": "^3.0.1",
+    "openai": "^4.12.4",
+    "webpack": "^5.89.0",
+    "webpack-cli": "^5.1.4"
+  },
+  "volta": {
+    "node": "18.18.2"
+  }
+}

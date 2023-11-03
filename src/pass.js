@@ -1,0 +1,3 @@
+const OPENAI_API_KEY = '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';
+
+module.exports = OPENAI_API_KEY;
