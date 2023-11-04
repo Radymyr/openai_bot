@@ -2,10 +2,10 @@
   "name": "openai_bot",
   "version": "1.0.0",
   "description": "openai bot",
-  "main": "index.js",
+  "main": "src/index.js",
   "scripts": {
     "test": "test",
-    "start": "nodemon bot.js",
+    "start": "nodemon index.js",
     "develop": "webpack --mode=development",
     "build": "webpack --mode=production"
   },
@@ -21,7 +21,6 @@
   "homepage": "https://github.com/Radymyr/openai_bot#readme",
   "dependencies": {
     "dotenv": "^16.3.1",
-    "nodemon": "^3.0.1",
     "openai": "^4.12.4",
     "telegraf": "^3.38.0",
     "webpack": "^5.89.0",
@@ -29,5 +28,8 @@
   },
   "volta": {
     "node": "18.18.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
   }
 }
