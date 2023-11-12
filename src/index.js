@@ -11,69 +11,78 @@ const openai = new OpenAI({
   apiKey: OPENAI_API_KEY,
 });
 
-let messages = [
-  {
-    role: 'user',
-    content: 'на русском',
-  },
-];
+async function getRequest(id, userContent = null) {
+  const messages = [
+    {
+      role: 'user',
+      content: userContent,
+    },
+  ];
 
-async function main(messages) {
-  let data = null;
-  let combinedData = JSON.parse(fs.readFileSync('message.json', 'utf-8'));
+  let roles = [];
+  let combinedData = [];
+  let systemRules = {
+    role: 'system',
+    content: 'твое имя "Саня Зелень"',
+  };
+
+  try {
+    combinedData = JSON.parse(fs.readFileSync(`${id}.json`, 'utf-8'));
+  } catch {
+    fs.writeFileSync(`${id}.json`, JSON.stringify([systemRules]));
+  }
+
+  try {
+    roles = JSON.parse(fs.readFileSync(`${id}.json`, 'utf-8'));
+    console.log('data:', roles);
+  } catch (err) {
+    console.error(err);
+  }
+
+  console.log('Data sent to OpenAI server:', [
+    roles[0],
+    ...combinedData.slice(-4),
+    ...messages,
+  ]);
 
   const completion = await openai.chat.completions.create({
-    messages: [...combinedData, ...messages],
+    messages: [roles[0], ...combinedData.slice(-2), ...messages],
     model: 'gpt-3.5-turbo',
   });
 
   const answer = await completion.choices[0].message;
 
-  try {
-    data = JSON.parse(fs.readFileSync('message.json', 'utf-8'));
-  } catch (err) {
-    console.error(err);
-  }
+  combinedData = [...roles, ...messages, answer];
+  fs.writeFileSync(`${id}.json`, JSON.stringify(combinedData));
 
-  combinedData = [...data, ...messages, answer];
-  fs.writeFileSync('message.json', JSON.stringify(combinedData));
+  return answer.content;
 }
-
-// main(messages);
 
 bot.on('message', async (ctx) => {
   console.log(ctx.message);
-
   try {
-    if (ctx.message.video_note) {
-      ctx.reply(`${ctx.from.first_name}, позже гляну`, {
-        chat_id: ctx.chat.id,
-      });
-      return;
-    }
-
-    if (ctx.message.voice) {
-      ctx.reply(
-        `Прости бро ${ctx.from.first_name}, мне мамка запрещает слушать голосовые`,
-        { chat_id: ctx.chat.id }
-      );
-      return;
-    }
-
     if (ctx.message.reply_to_message?.from.is_bot) {
       const originalMessage = ctx.message.reply_to_message;
-
-      ctx.reply('это ответ на сообщение', {
+      const response = await getRequest(ctx.from.id, ctx.message.text);
+      ctx.reply(response, {
         reply_to_message_id: originalMessage.message_id,
       });
     }
 
-    if (ctx.message.text.includes('@Cheese_GPT_bot')) {
-      ctx.reply(`Hello @${ctx.from.username}, ты обратился к боту через @`, {
+    if (ctx.message.text?.includes('@Cheese_GPT_bot')) {
+      const response = await getRequest(ctx.from.id, ctx.message.text);
+
+      ctx.reply(response, {
         reply_to_message_id: ctx.message.message_id,
       });
     }
   } catch (err) {
+    if (!ctx.message.text) {
+      ctx.reply(
+        `Прости бро ${ctx.from.first_name}, я не знаю как это понимать, напиши текстом ;)`,
+        { reply_to_message_id: ctx.message.message_id }
+      );
+    }
     console.log(err);
   }
 });
