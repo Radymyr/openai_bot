@@ -5,13 +5,21 @@ const { OPENAI_API_KEY } = require('./pass.js');
 const { BOT_TOKEN } = require('./pass.js');
 
 const bot = new Telegraf(BOT_TOKEN);
-const fs = require('fs');
+const fs = require('fs/promises');
 
 const openai = new OpenAI({
   apiKey: OPENAI_API_KEY,
 });
 
-async function getRequest(id, userContent = null) {
+const getDate = (milliseconds) => {
+  const date = new Date(milliseconds * 1000);
+  const day = date.getDate();
+  const month = date.getMonth() + 1;
+  const year = date.getFullYear();
+  return `${day}.${month}.${year}`;
+};
+
+async function getRequest(userId, groupId = 0, date, userContent = null) {
   const messages = [
     {
       role: 'user',
@@ -19,41 +27,51 @@ async function getRequest(id, userContent = null) {
     },
   ];
 
-  let roles = [];
   let combinedData = [];
   let systemRules = {
     role: 'system',
     content: 'твое имя "Саня Зелень"',
   };
+  const MAX_LENGTH_CONTEXT = -3;
 
   try {
-    combinedData = JSON.parse(fs.readFileSync(`${id}.json`, 'utf-8'));
+    combinedData = JSON.parse(
+      await fs.readFile(generateFileName(groupId, userId, date), 'utf-8')
+    );
   } catch {
-    fs.writeFileSync(`${id}.json`, JSON.stringify([systemRules]));
+    await fs.writeFile(
+      generateFileName(groupId, userId, date),
+      JSON.stringify([systemRules])
+    );
+    combinedData = [systemRules];
   }
 
-  try {
-    roles = JSON.parse(fs.readFileSync(`${id}.json`, 'utf-8'));
-    console.log('data:', roles);
-  } catch (err) {
-    console.error(err);
-  }
-
-  console.log('Data sent to OpenAI server:', [
-    roles[0],
-    ...combinedData.slice(-4),
-    ...messages,
-  ]);
+  // console.log('Data sent to OpenAI server:', [
+  //   combinedData[0],
+  //   ...combinedData.slice(MAX_LENGTH_CONTEXT),
+  //   ...messages,
+  // ]);
 
   const completion = await openai.chat.completions.create({
-    messages: [roles[0], ...combinedData.slice(-2), ...messages],
+    messages: [
+      combinedData[0],
+      ...combinedData.slice(MAX_LENGTH_CONTEXT),
+      ...messages,
+    ],
     model: 'gpt-3.5-turbo',
   });
 
   const answer = await completion.choices[0].message;
 
-  combinedData = [...roles, ...messages, answer];
-  fs.writeFileSync(`${id}.json`, JSON.stringify(combinedData));
+  combinedData = [...combinedData, ...messages, answer];
+  await fs.writeFile(
+    generateFileName(groupId, userId, date),
+    JSON.stringify(combinedData)
+  );
+
+  function generateFileName(groupId, userId, date) {
+    return `${groupId}-${userId}-${getDate(date)}.json`;
+  }
 
   return answer.content;
 }
@@ -63,14 +81,24 @@ bot.on('message', async (ctx) => {
   try {
     if (ctx.message.reply_to_message?.from.is_bot) {
       const originalMessage = ctx.message.reply_to_message;
-      const response = await getRequest(ctx.from.id, ctx.message.text);
+      const response = await getRequest(
+        ctx.chat.id,
+        ctx.from.id,
+        ctx.message.date,
+        ctx.message.text
+      );
       ctx.reply(response, {
         reply_to_message_id: originalMessage.message_id,
       });
     }
 
     if (ctx.message.text?.includes('@Cheese_GPT_bot')) {
-      const response = await getRequest(ctx.from.id, ctx.message.text);
+      const response = await getRequest(
+        ctx.chat.id,
+        ctx.from.id,
+        ctx.message.date,
+        ctx.message.text
+      );
 
       ctx.reply(response, {
         reply_to_message_id: ctx.message.message_id,
@@ -83,7 +111,7 @@ bot.on('message', async (ctx) => {
         { reply_to_message_id: ctx.message.message_id }
       );
     }
-    console.log(err);
+    console.error(err);
   }
 });
 
