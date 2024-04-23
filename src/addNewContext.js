@@ -12,7 +12,7 @@ const getFromRedis = async (key) => {
   try {
     const data = await client.get(key);
 
-    return JSON.parse(data);
+    return data ? JSON.parse(data) : [];
   } catch (error) {
     console.error('Error getting from Redis:', error.message);
   }
@@ -26,30 +26,40 @@ const removingContext = (context) => {
 };
 
 export const addToContext = async (message, userId, answer = {}) => {
-  const stringUserId = userId.toString();
+  try {
+    const stringUserId = userId.toString();
 
-  const systemSettings = {
-    role: 'system',
-    content: 'твое имя Саня Зелень',
-  };
+    const systemSettings = {
+      role: 'system',
+      content: 'твое имя Саня Зелень',
+    };
 
-  const context = await getFromRedis(stringUserId);
+    if (!message.content) {
+      console.error('Error: Message content is empty');
+      return;
+    }
 
-  const filteredContext = context.filter((item) => item);
+    const context = await getFromRedis(stringUserId);
 
-  const removedContext = removingContext(filteredContext);
+    const filteredContext = context.filter((item) => item);
 
-  let newContext = [];
+    const removedContext = removingContext(filteredContext);
 
-  if (Object.keys(answer).length > 0) {
-    newContext = [systemSettings, ...removedContext, answer, message];
-  } else {
-    newContext = [systemSettings, ...removedContext, message];
+    let newContext = [];
+
+    if (Object.keys(answer).length > 0) {
+      newContext = [systemSettings, ...removedContext, message, answer];
+    } else {
+      newContext = [systemSettings, ...removedContext, message];
+    }
+
+    console.log('ID_USER:', userId, 'newContext:', newContext);
+
+    await saveToRedis(stringUserId, newContext);
+
+    return newContext;
+  } catch (error) {
+    console.error('Error in addToContext:', error);
+    throw error;
   }
-
-  console.log('ID_USER:', userId, 'newContext:', newContext);
-
-  await saveToRedis(stringUserId, newContext);
-
-  return newContext;
 };
