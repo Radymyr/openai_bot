@@ -2,11 +2,12 @@
   "name": "openai_bot",
   "version": "1.0.0",
   "description": "openai bot",
-  "main": "src/index.js",
+  "main": "src/bot.js",
   "scripts": {
     "test": "test",
-    "start": "node src/index.js",
-    "dev": "nodemon index.js",
+    "start": "node src/bot.js",
+    "dev": "nodemon bot.js",
+    "vercel-build": "echo hello",
     "start:db": "docker-compose up -d database"
   },
   "repository": {
@@ -21,6 +22,7 @@
   "homepage": "https://github.com/Radymyr/openai_bot#readme",
   "dependencies": {
     "dotenv": "^16.3.2",
+    "express": "^4.19.2",
     "openai": "^4.12.4",
     "redis": "^4.6.12",
     "telegraf": "^3.38.0"

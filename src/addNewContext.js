@@ -1,4 +1,4 @@
-import { client } from './index.js';
+import { client } from './bot.js';
 
 const saveToRedis = async (key, data) => {
   try {
