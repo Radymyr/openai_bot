@@ -2,6 +2,8 @@ import OpenAI from 'openai';
 import Telegraf from 'telegraf';
 import { createClient } from 'redis';
 import 'dotenv/config';
+import express from 'express';
+const app = express();
 
 import { addToContext } from './addNewContext.js';
 import { dictionary } from './dictionary.js';
@@ -9,6 +11,7 @@ import { getJokes } from './jokes.js';
 
 const bot = new Telegraf(process.env.BOT_TOKEN);
 const apiKey = process.env.OPENAI_API_KEY;
+const PORT = process.env.PORT || 3000;
 
 const openAi = new OpenAI({
   apiKey: apiKey,
@@ -131,3 +134,9 @@ bot.on('message', async (ctx) => {
 });
 
 bot.launch();
+
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
+});
+
+export default app;
