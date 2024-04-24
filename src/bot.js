@@ -17,6 +17,10 @@ const openAi = new OpenAI({
   apiKey: apiKey,
 });
 
+app.get('/', async (req, res) => {
+  res.send('hello, i am start page');
+});
+
 export const client = createClient({
   password: process.env.REDIS_PASSWORD,
   socket: {
