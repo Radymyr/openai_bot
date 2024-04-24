@@ -5,9 +5,9 @@
   "main": "src/index.js",
   "scripts": {
     "test": "test",
-    "start": "nodemon index.js",
-    "develop": "webpack --mode=development",
-    "build": "webpack --mode=production"
+    "start": "node src/index.js",
+    "dev": "nodemon index.js",
+    "start:db": "docker-compose up -d database"
   },
   "repository": {
     "type": "git",
@@ -20,16 +20,16 @@
   },
   "homepage": "https://github.com/Radymyr/openai_bot#readme",
   "dependencies": {
-    "dotenv": "^16.3.1",
+    "dotenv": "^16.3.2",
     "openai": "^4.12.4",
-    "telegraf": "^3.38.0",
-    "webpack": "^5.89.0",
-    "webpack-cli": "^5.1.4"
+    "redis": "^4.6.12",
+    "telegraf": "^3.38.0"
   },
   "volta": {
     "node": "18.18.2"
   },
   "devDependencies": {
     "nodemon": "^3.0.1"
-  }
+  },
+  "type": "module"
 }

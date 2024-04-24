@@ -3,9 +3,9 @@ import Telegraf from 'telegraf';
 import { createClient } from 'redis';
 import 'dotenv/config';
 
-import { kickMembers } from './kickChatMember.js';
 import { addToContext } from './addNewContext.js';
 import { dictionary } from './dictionary.js';
+import { getJokes } from './jokes.js';
 
 const bot = new Telegraf(process.env.BOT_TOKEN);
 const apiKey = process.env.OPENAI_API_KEY;
@@ -25,8 +25,6 @@ export const client = createClient({
 client.on('error', (err) => console.log('Redis Client Error', err));
 
 client.connect();
-
-// bot.on('message', kickMembers);
 
 async function getDataFromOpenAi(userId, message) {
   try {
@@ -54,16 +52,46 @@ async function getDataFromOpenAi(userId, message) {
   }
 }
 
+bot.on('migrate_to_chat_id', (ctx) => {
+  try {
+    ctx.chat.id = ctx.migrate_to_chat_id;
+  } catch (error) {
+    console.error('Error updating chat id:', error);
+  }
+});
+
 bot.on('message', async (ctx) => {
   console.log(ctx.message);
   try {
-    if (!ctx.message.text) {
+    if (ctx.message.voice && ctx.message?.reply_to_message?.from.is_bot) {
+      ctx.reply(`Слышите, вроде как собака скулит 🦮`, {
+        reply_to_message_id: ctx.message.message_id,
+      });
+      return;
+    }
+
+    if (ctx.message.video_note && ctx.message?.reply_to_message?.from.is_bot) {
+      ctx.reply(`Ух какая милая мордашка, подрочу на нее позже 😏`, {
+        reply_to_message_id: ctx.message.message_id,
+      });
+      return;
+    }
+
+    if (!ctx.message.text && ctx.message?.reply_to_message?.from.is_bot) {
       ctx.reply(
-        `Прости бро ${ctx.from.first_name}, я не знаю как это понимать, напиши текстом ;)`,
+        `Ха, ха ${ctx.from.first_name}, смешно, но больше так не делай, а то найду и выебу 🍆🍆🍆`,
         { reply_to_message_id: ctx.message.message_id }
       );
       return;
     }
+
+    if (!ctx.message.text) {
+      return;
+    }
+
+    const loweredText = ctx.message.text?.toLowerCase();
+
+    getJokes(ctx, loweredText);
 
     if (ctx.message.reply_to_message?.from.is_bot) {
       console.log('bot replay to message');
@@ -79,9 +107,7 @@ bot.on('message', async (ctx) => {
     }
 
     for (const name of dictionary) {
-      const text = ctx.message.text?.toLowerCase();
-
-      if (text?.includes(name)) {
+      if (loweredText?.includes(name)) {
         console.log('calling bot by name...');
         const response = await getDataFromOpenAi(ctx.message.from.id, {
           role: 'user',
