@@ -9,6 +9,7 @@ import { dictionary } from './dictionary.js';
 import { getJokes } from './jokes.js';
 import { kickMembers } from './kickChatMember.js';
 import { bot } from './initializers.js';
+import { USERS_ID } from './dictionary.js';
 
 const apiKey = process.env.OPENAI_API_KEY;
 const PORT = process.env.PORT || 3000;
@@ -28,8 +29,6 @@ export const client = createClient({
     port: process.env.REDIS_PORT,
   },
 });
-
-client.on('error', (err) => console.log('Redis Client Error', err));
 
 client.connect();
 
@@ -70,8 +69,13 @@ bot.on('migrate_to_chat_id', (ctx) => {
 bot.on('message', async (ctx) => {
   const chatId = '-1001928791477';
   console.log('information message:', ctx.message);
+  // if (ctx.message?.from.id === USERS_ID[0].id) {
+  //   ctx.reply('🖕');
+  //   return;
+  // }
+
   if (ctx.message?.from.id === 275210708 && ctx.chat.id === 275210708) {
-    bot.telegram.sendMessage(chatId, ctx.message?.text || 'message is empty');
+    // bot.telegram.sendMessage(chatId, ctx.message?.text || 'message is empty');
   } else {
     bot.telegram.sendMessage(
       '275210708',
@@ -81,9 +85,6 @@ bot.on('message', async (ctx) => {
 });
 
 bot.on('message', async (ctx) => {
-  if (ctx) {
-    return;
-  }
   console.log(ctx?.message);
   try {
     if (ctx.message?.voice && ctx.message?.reply_to_message?.from.is_bot) {
