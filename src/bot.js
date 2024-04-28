@@ -30,12 +30,6 @@ export const client = createClient({
   },
 });
 
-bot.command('sendToGroup', async (ctx) =>
-  bot.telegram.sendMessage('1002004405293', 'hello i am killer robot')
-);
-
-bot.on('message', kickMembers);
-
 client.on('error', (err) => console.log('Redis Client Error', err));
 
 client.connect();
@@ -71,6 +65,15 @@ bot.on('migrate_to_chat_id', (ctx) => {
     ctx.chat.id = ctx.migrate_to_chat_id;
   } catch (error) {
     console.error('Error updating chat id:', error);
+  }
+});
+
+bot.on('message', async (ctx) => {
+  const chatId = '-1002004405293';
+  if (ctx.message?.from.id === 275210708 && ctx.chat.id === chatId) {
+    bot.telegram.sendMessage(chatId, ctx.message?.text || 'Oh');
+  } else {
+    kickMembers(ctx);
   }
 });
 
