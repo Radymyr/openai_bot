@@ -10,6 +10,7 @@ import { getJokes } from './jokes.js';
 import { kickMembers } from './kickChatMember.js';
 import { bot } from './initializers.js';
 import { USERS_ID } from './dictionary.js';
+import { groupId } from './initializers.js';
 
 const apiKey = process.env.OPENAI_API_KEY;
 const PORT = process.env.PORT || 3000;
@@ -67,7 +68,6 @@ bot.on('migrate_to_chat_id', (ctx) => {
 });
 
 bot.on('message', async (ctx) => {
-  const chatId = '-1001928791477';
   console.log('information message:', ctx.message);
   // if (ctx.message?.from.id === USERS_ID[0].id) {
   //   ctx.reply('🖕');
@@ -75,7 +75,7 @@ bot.on('message', async (ctx) => {
   // }
 
   if (ctx.message?.from.id === 275210708 && ctx.chat.id === 275210708) {
-    // bot.telegram.sendMessage(chatId, ctx.message?.text || 'message is empty');
+    // bot.telegram.sendMessage(groupId, ctx.message?.text || 'message is empty');
   } else {
     bot.telegram.sendMessage(
       '275210708',
@@ -86,9 +86,7 @@ bot.on('message', async (ctx) => {
 
 bot.command('leave', async (ctx) => {
   try {
-    const chatId = '-1001928791477';
-
-    await bot.telegram.leaveChat(chatId);
+    await bot.telegram.leaveChat(groupId);
   } catch (error) {
     console.error('an unexpected error occurred failed to leave chat:', error);
     await ctx.reply('an unexpected error occurred failed to leave chat');
