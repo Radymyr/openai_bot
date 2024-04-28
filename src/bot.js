@@ -75,12 +75,23 @@ bot.on('message', async (ctx) => {
   // }
 
   if (ctx.message?.from.id === 275210708 && ctx.chat.id === 275210708) {
-    bot.telegram.sendMessage(chatId, ctx.message?.text || 'message is empty');
+    // bot.telegram.sendMessage(chatId, ctx.message?.text || 'message is empty');
   } else {
     bot.telegram.sendMessage(
       '275210708',
       `${ctx.from?.first_name}: ${ctx.message?.text || 'message is empty'}`
     );
+  }
+});
+
+bot.command('leave', async (ctx) => {
+  try {
+    const chatId = '-1001928791477';
+
+    await bot.telegram.leaveChat(chatId);
+  } catch (error) {
+    console.error('an unexpected error occurred failed to leave chat:', error);
+    await ctx.reply('an unexpected error occurred failed to leave chat');
   }
 });
 
