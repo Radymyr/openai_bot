@@ -68,6 +68,9 @@ bot.on('migrate_to_chat_id', (ctx) => {
 });
 
 bot.on('message', async (ctx) => {
+  if (ctx) {
+    return;
+  }
   const chatId = '-1001928791477';
   console.log('information message:', ctx.message);
   if (ctx.message?.from.id === 275210708 && ctx.chat.id === 275210708) {
@@ -77,13 +80,6 @@ bot.on('message', async (ctx) => {
       '275210708',
       `${ctx.from?.first_name}: ${ctx.message?.text || 'message is empty'}`
     );
-  }
-});
-
-bot.command('leave', async (ctx) => {
-  const chatId = '-1002004405293';
-  if (ctx.message?.from.id === 275210708 && ctx.chat.id === 275210708) {
-    await bot.telegram.leaveChat(chatId);
   }
 });
 
