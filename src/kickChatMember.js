@@ -1,5 +1,5 @@
 import Telegraf from 'telegraf';
-const bot = new Telegraf(process.env.BOT_TOKEN);
+import { bot } from './initializers.js';
 
 export async function kickMembers(ctx) {
   try {

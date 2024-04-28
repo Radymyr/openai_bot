@@ -1,5 +1,4 @@
 import OpenAI from 'openai';
-import Telegraf from 'telegraf';
 import { createClient } from 'redis';
 import 'dotenv/config';
 import express from 'express';
@@ -9,8 +8,8 @@ import { addToContext } from './addNewContext.js';
 import { dictionary } from './dictionary.js';
 import { getJokes } from './jokes.js';
 import { kickMembers } from './kickChatMember.js';
+import { bot } from './initializers.js';
 
-export const bot = new Telegraf(process.env.BOT_TOKEN);
 const apiKey = process.env.OPENAI_API_KEY;
 const PORT = process.env.PORT || 3000;
 
@@ -50,7 +49,7 @@ async function getDataFromOpenAi(userId, message) {
       model: 'gpt-3.5-turbo',
     });
 
-    const answer = await completion.choices[0].message;
+    const answer = completion.choices[0].message;
 
     await addToContext(answer, userId);
 
@@ -69,10 +68,14 @@ bot.on('migrate_to_chat_id', (ctx) => {
 });
 
 bot.on('message', async (ctx) => {
-  const chatId = '-1002004405293';
-  if (ctx.message?.from.id === 275210708 && ctx.chat.id === chatId) {
+  const chatId = '-1001928791477';
+  if (ctx.message?.from.id === 275210708 && ctx.chat.id === 275210708) {
     bot.telegram.sendMessage(chatId, ctx.message?.text || 'Oh');
   } else {
+    bot.telegram.sendMessage(
+      '275210708',
+      `${ctx.from?.first_name}: ${ctx.message?.text}`
+    );
     kickMembers(ctx);
   }
 });
