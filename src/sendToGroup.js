@@ -1,4 +1,4 @@
-import { bot } from './bot';
+import { bot } from './bot.js';
 
 export function sendToGroup(
   command = 'sendToGroup',
