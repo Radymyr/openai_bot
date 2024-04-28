@@ -68,16 +68,16 @@ bot.on('migrate_to_chat_id', (ctx) => {
 });
 
 bot.on('message', async (ctx) => {
-  console.log(ctx.message);
+  console.log(ctx?.message);
   try {
-    if (ctx.message.voice && ctx.message?.reply_to_message?.from.is_bot) {
+    if (ctx.message?.voice && ctx.message?.reply_to_message?.from.is_bot) {
       ctx.reply(`Слышите, вроде как собака скулит 🦮`, {
         reply_to_message_id: ctx.message.message_id,
       });
       return;
     }
 
-    if (ctx.message.video_note && ctx.message?.reply_to_message?.from.is_bot) {
+    if (ctx.message?.video_note && ctx.message?.reply_to_message?.from.is_bot) {
       ctx.reply(`Ух какая милая мордашка, подрочу на нее позже 😏`, {
         reply_to_message_id: ctx.message.message_id,
       });
