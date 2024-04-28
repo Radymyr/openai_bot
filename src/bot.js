@@ -8,6 +8,7 @@ const app = express();
 import { addToContext } from './addNewContext.js';
 import { dictionary } from './dictionary.js';
 import { getJokes } from './jokes.js';
+import { kickMembers } from './kickChatMember.js';
 
 const bot = new Telegraf(process.env.BOT_TOKEN);
 const apiKey = process.env.OPENAI_API_KEY;
@@ -32,6 +33,8 @@ export const client = createClient({
 client.on('error', (err) => console.log('Redis Client Error', err));
 
 client.connect();
+
+bot.on('message', kickMembers);
 
 async function getDataFromOpenAi(userId, message) {
   try {
@@ -68,6 +71,9 @@ bot.on('migrate_to_chat_id', (ctx) => {
 });
 
 bot.on('message', async (ctx) => {
+  if (ctx) {
+    return;
+  }
   console.log(ctx?.message);
   try {
     if (ctx.message?.voice && ctx.message?.reply_to_message?.from.is_bot) {
