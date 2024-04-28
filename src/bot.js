@@ -81,7 +81,7 @@ bot.on('message', async (ctx) => {
 });
 
 bot.command('leave', async (ctx) => {
-  const chatId = '-1001928791477';
+  const chatId = '-1002004405293';
   if (ctx.message?.from.id === 275210708 && ctx.chat.id === 275210708) {
     await bot.telegram.leaveChat(chatId);
   }
