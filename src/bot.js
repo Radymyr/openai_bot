@@ -9,8 +9,9 @@ import { addToContext } from './addNewContext.js';
 import { dictionary } from './dictionary.js';
 import { getJokes } from './jokes.js';
 import { kickMembers } from './kickChatMember.js';
+import { sendToGroup } from './sendToGroup.js';
 
-const bot = new Telegraf(process.env.BOT_TOKEN);
+export const bot = new Telegraf(process.env.BOT_TOKEN);
 const apiKey = process.env.OPENAI_API_KEY;
 const PORT = process.env.PORT || 3000;
 
@@ -34,7 +35,7 @@ client.on('error', (err) => console.log('Redis Client Error', err));
 
 client.connect();
 
-bot.on('message', kickMembers);
+bot.on('message', sendToGroup);
 
 async function getDataFromOpenAi(userId, message) {
   try {
