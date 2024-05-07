@@ -57,13 +57,15 @@ bot.on('message', async (ctx, next) => {
   ) {
     bot.telegram.sendMessage(
       groupId[1].id,
-      ctx.message?.text || 'non-textual content'
+      ctx.message?.text || 'non-textual content!'
     );
   } else {
     !ctx.message?.reply_to_message?.from.is_bot &&
       bot.telegram.sendMessage(
         '275210708',
-        `${ctx.from?.first_name}: ${ctx.message?.text || 'non-textual content'}`
+        `${ctx.from?.first_name}: ${
+          ctx.message?.text || 'non-textual content!'
+        }`
       );
   }
 
