@@ -1,4 +1,4 @@
-import { client } from './bot.js';
+import { client } from './initializers.js';
 
 const saveToRedis = async (key, data) => {
   try {
@@ -40,6 +40,9 @@ export const addToContext = async (message, userId, answer = {}) => {
     }
 
     const context = await getFromRedis(stringUserId);
+    if (!context) {
+      return;
+    }
 
     const filteredContext = context.filter((item) => item);
 

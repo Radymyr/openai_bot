@@ -1,39 +1,23 @@
-import OpenAI from 'openai';
-import { createClient } from 'redis';
 import 'dotenv/config';
 import express from 'express';
 const app = express();
 
+import { openAi } from './initializers.js';
 import { addToContext } from './addNewContext.js';
 import { dictionary } from './dictionary.js';
 import { getJokes } from './jokes.js';
-import { kickMembers } from './kickChatMember.js';
 import { bot } from './initializers.js';
 import { USERS_ID } from './dictionary.js';
 import { groupId } from './initializers.js';
+import { emptyMessage } from './initializers.js';
 
-const apiKey = process.env.OPENAI_API_KEY;
 const PORT = process.env.PORT || 3000;
-
-const openAi = new OpenAI({
-  apiKey: apiKey,
-});
 
 app.get('/', async (req, res) => {
   res.send('hello, i am start page');
 });
 
-export const client = createClient({
-  password: process.env.REDIS_PASSWORD,
-  socket: {
-    host: process.env.PUBLIC_ENDPOINT,
-    port: process.env.REDIS_PORT,
-  },
-});
-
-client.connect();
-
-async function getDataFromOpenAi(userId, message) {
+async function getDataFromOpenAi(userId, message = emptyMessage) {
   try {
     if (!message.content) {
       console.error('Error: Message content is empty');
@@ -46,7 +30,7 @@ async function getDataFromOpenAi(userId, message) {
 
     const completion = await openAi.chat.completions.create({
       messages,
-      model: 'gpt-3.5-turbo',
+      model: 'deepseek-chat',
     });
 
     const answer = completion.choices[0].message;
@@ -55,42 +39,35 @@ async function getDataFromOpenAi(userId, message) {
 
     return answer.content;
   } catch (error) {
-    console.error('Error sending message to openai.', error);
+    console.error('Error sending message to openai', error);
   }
 }
 
-bot.on('migrate_to_chat_id', (ctx) => {
-  try {
-    ctx.chat.id = ctx.migrate_to_chat_id;
-  } catch (error) {
-    console.error('Error updating chat id:', error);
-  }
-});
-
-bot.on('message', async (ctx) => {
+bot.on('message', async (ctx, next) => {
   console.log('information message:', ctx.message);
-  // if (ctx.message?.from.id === USERS_ID[0].id) {
-  //   ctx.reply('🖕');
-  //   return;
-  // }
+  if (ctx.message?.from.id === USERS_ID[0].id) {
+    ctx.reply('🖕');
+    return;
+  }
 
-  if (ctx.message?.from.id === 275210708 && ctx.chat.id === 275210708) {
-    bot.telegram.sendMessage(groupId, ctx.message?.text || 'message is empty');
-  } else {
+  if (
+    ctx.message?.from.id === 275210708 &&
+    ctx.chat.id === 275210708 &&
+    !ctx.message?.reply_to_message?.from.is_bot
+  ) {
     bot.telegram.sendMessage(
-      '275210708',
-      `${ctx.from?.first_name}: ${ctx.message?.text || 'message is empty'}`
+      groupId,
+      ctx.message?.text || 'non-textual content'
     );
+  } else {
+    !ctx.message?.reply_to_message?.from.is_bot &&
+      bot.telegram.sendMessage(
+        '275210708',
+        `${ctx.from?.first_name}: ${ctx.message?.text || 'non-textual content'}`
+      );
   }
-});
 
-bot.command('leave', async (ctx) => {
-  try {
-    await bot.telegram.leaveChat(groupId);
-  } catch (error) {
-    console.error('an unexpected error occurred failed to leave chat:', error);
-    await ctx.reply('an unexpected error occurred failed to leave chat');
-  }
+  next();
 });
 
 bot.on('message', async (ctx) => {

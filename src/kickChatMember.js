@@ -1,4 +1,3 @@
-import Telegraf from 'telegraf';
 import { bot } from './initializers.js';
 
 export async function kickMembers(ctx) {
