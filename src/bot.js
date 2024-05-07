@@ -56,7 +56,7 @@ bot.on('message', async (ctx, next) => {
     !ctx.message?.reply_to_message?.from.is_bot
   ) {
     bot.telegram.sendMessage(
-      groupId,
+      groupId[1].id,
       ctx.message?.text || 'non-textual content'
     );
   } else {
